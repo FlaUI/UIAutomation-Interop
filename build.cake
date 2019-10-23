@@ -155,6 +155,7 @@ private NuGetPackSettings CreateNuGetPackSettings(string package, bool signed) {
       Files                    = new [] {
                                     new NuSpecContent { Source = $"{baseFolder}/3.5/Interop.{package}.dll", Target = "lib/net35" },
                                     new NuSpecContent { Source = $"{baseFolder}/4.5/Interop.{package}.dll", Target = "lib/net45" },
+                                    new NuSpecContent { Source = $"files/Interop.{package}.targets", Target = "build" },
                                  },
       BasePath                 = "./",
       OutputDirectory          = nugetFolder

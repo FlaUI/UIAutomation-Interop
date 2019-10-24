@@ -6,7 +6,7 @@
     </PropertyGroup>
     <ItemGroup>
       <ReferencePath Condition=" '%(FileName)' == '$(_InteropAssemblyFileName)' AND '%(ReferencePath.NuGetPackageId)' == '$(MSBuildThisFileName)' ">
-        <EmbedInteropTypes>true</EmbedInteropTypes>
+        <EmbedInteropTypes>false</EmbedInteropTypes>
       </ReferencePath>
     </ItemGroup>
   </Target>

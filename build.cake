@@ -157,6 +157,7 @@ private NuGetPackSettings CreateNuGetPackSettings(string package, bool signed) {
                                     new NuSpecContent { Source = $"{baseFolder}/4.5/Interop.{package}.dll", Target = "lib/net45" },
                                     new NuSpecContent { Source = $"LICENSE.txt", Target = "" },
                                     new NuSpecContent { Source = $"files/Interop.{package}.targets", Target = "build" },
+                                    new NuSpecContent { Source = $"files/install_{package}.ps1", Target = "tools/install.ps1" },
                                  },
       BasePath                 = "./",
       OutputDirectory          = nugetFolder

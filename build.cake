@@ -154,7 +154,10 @@ private NuGetPackSettings CreateNuGetPackSettings(string package, bool signed) {
       RequireLicenseAcceptance = false,
       Files                    = new [] {
                                     new NuSpecContent { Source = $"{baseFolder}/3.5/Interop.{package}.dll", Target = "lib/net35" },
+                                    new NuSpecContent { Source = $"{baseFolder}/4.5/Interop.{package}.dll", Target = "lib/net40" },
                                     new NuSpecContent { Source = $"{baseFolder}/4.5/Interop.{package}.dll", Target = "lib/net45" },
+                                    new NuSpecContent { Source = $"{baseFolder}/4.5/Interop.{package}.dll", Target = "lib/netcoreapp3.0" },
+                                    new NuSpecContent { Source = $"{baseFolder}/4.5/Interop.{package}.dll", Target = "lib/netstandard2.0" },
                                     new NuSpecContent { Source = $"LICENSE.txt", Target = "" },
                                     new NuSpecContent { Source = $"files/Interop.{package}.targets", Target = "build" },
                                     new NuSpecContent { Source = $"files/install_{package}.ps1", Target = "tools/install.ps1" },

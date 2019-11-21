@@ -1,4 +1,4 @@
-#addin "Cake.Powershell"
+#load scripts/FixAutomationCoreIL.cake
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -80,12 +80,8 @@ Task("Build")
       RunInVisualStudioCommandPrompt($@"ildasm.exe {outFolder}\Interop.UIAutomationCore.dll /out={outFolder}\UIAutomationCore.il /nobar");
       RunInVisualStudioCommandPrompt($@"ildasm.exe {outFolderSigned}\Interop.UIAutomationCore.dll /out={outFolderSigned}\UIAutomationCore.il /nobar");
       // Apply the fixes to the IL files
-      StartPowershellFile("./scripts/FixAutomationCore.ps1", args => {
-         args.Append("file", $@"{outFolder}\UIAutomationCore.il");
-      });
-      StartPowershellFile("./scripts/FixAutomationCore.ps1", args => {
-         args.Append("file", $@"{outFolderSigned}\UIAutomationCore.il");
-      });
+      FixIL($@"{outFolder}\UIAutomationCore.il");
+      FixIL($@"{outFolderSigned}\UIAutomationCore.il");
       // Re-Assemble the dlls
       RunInVisualStudioCommandPrompt($@"ilasm.exe /dll /output={finalFolder}\Interop.UIAutomationCore.dll {outFolder}\UIAutomationCore.il /res:{outFolder}\UIAutomationCore.res");
       RunInVisualStudioCommandPrompt($@"ilasm.exe /dll /output={finalFolderSigned}\Interop.UIAutomationCore.dll {outFolderSigned}\UIAutomationCore.il /res:{outFolderSigned}\UIAutomationCore.res");

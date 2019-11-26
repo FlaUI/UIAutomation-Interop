@@ -12,7 +12,17 @@ var configuration = Argument("configuration", "Release");
 ///////////////////////////////////////////////////////////////////////////////
 
 var visualStudioCommandPrompt = @"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat";
-var windowsSdkVersion = "10.0.18362.0";
+if (!FileExists(visualStudioCommandPrompt))
+{
+    // Fallback to community edition
+    visualStudioCommandPrompt = @"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat";
+}
+
+//var windowsSdkVersion = new Version(10, 0, 16299, 0);
+//var windowsSdkVersion = new Version(10, 0, 17763, 0);
+var windowsSdkVersion = new Version(10, 0, 18362, 0);
+var windowsSdkVersionString = windowsSdkVersion.ToString();
+var nugetPackageVersion = $"{windowsSdkVersion.Major}.{windowsSdkVersion.Build}.0";
 
 var artifacts = Directory("./.artifacts");
 var temp = Directory("./.temp");
@@ -53,8 +63,8 @@ Task("Build")
    .Does(() =>
 {
    // Create the type libraries
-   RunInVisualStudioCommandPrompt($@"midl.exe /nologo /out ""{temp}"" /char signed /tlb UIAutomationClient.tlb /h UIAutomationClient_h.h ""{files}/Windows SDK/{windowsSdkVersion}/UIAutomationClient.idl""");
-   RunInVisualStudioCommandPrompt($@"midl.exe /nologo /out ""{temp}"" /char signed /tlb UIAutomationCore.tlb /h UIAutomationCore.h ""{files}/Windows SDK/{windowsSdkVersion}/UIAutomationCore.idl""");
+   RunInVisualStudioCommandPrompt($@"midl.exe /nologo /out ""{temp}"" /char signed /tlb UIAutomationClient.tlb /h UIAutomationClient_h.h ""{files}/Windows SDK/{windowsSdkVersionString}/UIAutomationClient.idl""");
+   RunInVisualStudioCommandPrompt($@"midl.exe /nologo /out ""{temp}"" /char signed /tlb UIAutomationCore.tlb /h UIAutomationCore.h ""{files}/Windows SDK/{windowsSdkVersionString}/UIAutomationCore.idl""");
 
    // Create the dlls from the tlbs
    foreach (var fwVersion in new [] {"3.5", "4.5"}) {
@@ -69,11 +79,11 @@ Task("Build")
       CleanDirectory(finalFolderSigned);
       
       // Generate the dlls for the client
-      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersion} /out:""{finalFolder}\Interop.UIAutomationClient.dll"" ""{temp}\UIAutomationClient.tlb""");
-      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersion} /out:""{finalFolderSigned}\Interop.UIAutomationClient.dll"" ""{temp}\UIAutomationClient.tlb"" /keyfile:""key.snk""");
+      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersionString} /out:""{finalFolder}\Interop.UIAutomationClient.dll"" ""{temp}\UIAutomationClient.tlb""");
+      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersionString} /out:""{finalFolderSigned}\Interop.UIAutomationClient.dll"" ""{temp}\UIAutomationClient.tlb"" /keyfile:""key.snk""");
       // Generate the dlls for the core
-      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersion} /out:""{outFolder}\Interop.UIAutomationCore.dll"" ""{temp}\UIAutomationCore.tlb""");
-      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersion} /out:""{outFolderSigned}\Interop.UIAutomationCore.dll"" ""{temp}\UIAutomationCore.tlb"" /keyfile:""key.snk""");
+      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersionString} /out:""{outFolder}\Interop.UIAutomationCore.dll"" ""{temp}\UIAutomationCore.tlb""");
+      RunInVisualStudioCommandPrompt($@"""{tlbimpExecutableMap[fwVersion]}"" /machine:Agnostic /silent /asmversion:{windowsSdkVersionString} /out:""{outFolderSigned}\Interop.UIAutomationCore.dll"" ""{temp}\UIAutomationCore.tlb"" /keyfile:""key.snk""");
 
       // Apply some manual fixes to the UIAutomationCore dlls
       // Disassemble the dlls
@@ -103,17 +113,17 @@ Task("Pack")
 Task("Push")
    .Does(() =>
 {
-   // TODO
-   return;
+    var apiKey = System.IO.File.ReadAllText(".nugetapikey");
 
-   // Get the paths to the packages.
-   var packages = GetFiles($"{nugetFolder}/*.nupkg");
-
-   // Push the package.
-   NuGetPush(packages, new NuGetPushSettings {
-      Source = "xxx",
-      ApiKey = "xxx"
-   });
+    // Get the paths to the packages.
+    var files = GetFiles($"{nugetFolder}/*.nupkg");
+    foreach (var package in files) {
+        Information($"Pushing {package}");
+        NuGetPush(package, new NuGetPushSettings {
+            Source = "https://nuget.org/api/v2/package",
+            ApiKey = apiKey
+        });
+    }
 });
 
 Task("Default")
@@ -138,7 +148,7 @@ private NuGetPackSettings CreateNuGetPackSettings(string package, bool signed) {
 
    return new NuGetPackSettings {
       Id                       = packageId,
-      Version                  = windowsSdkVersion,
+      Version                  = nugetPackageVersion,
       Title                    = packageId,
       Authors                  = new[] { "Roemer" },
       Owners                   = new[] { "Roemer" },

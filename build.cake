@@ -22,7 +22,8 @@ if (!FileExists(visualStudioCommandPrompt))
 //var windowsSdkVersion = new Version(10, 0, 17763, 0);
 //var windowsSdkVersion = new Version(10, 0, 18362, 0);
 //var windowsSdkVersion = new Version(10, 0, 19041, 0);
-var windowsSdkVersion = new Version(10, 0, 20348, 0);
+//var windowsSdkVersion = new Version(10, 0, 20348, 0);
+var windowsSdkVersion = new Version(10, 0, 22000, 194);
 
 var windowsSdkVersionString = windowsSdkVersion.ToString();
 var nugetPackageVersion = $"{windowsSdkVersion.Major}.{windowsSdkVersion.Build}.0";
